@@ -7,6 +7,9 @@ Blood (2021) https://ashpublications.org/blood/article-abstract/138/19/1885/4760
 
 Instead of using traditional supervised classifiers alone, this project takes a network-driven perspective to understand how mutations co-occur, cluster, and define biological AML subtypes.
 
+Acute Myeloid Leukemia (AML) is driven by complex combinations of somatic gene mutations rather than isolated genetic events. 
+Understanding how mutations co-occur and organize into biological programs is essential for uncovering leukemogenic mechanisms and therapeutic vulnerabilities.
+
 
 💡 Core Idea
 
@@ -144,4 +147,185 @@ Thresholding may miss rare subtypes
 Simulated dataset used for demonstration
 
 
+
+###Causal**
+
+Project applies causal inference–inspired statistical modeling to large-scale AML mutation data to reconstruct a directed mutation co-occurrence network. The goal is to identify strong, statistically significant mutation dependencies that may reflect mutation ordering, pathway coupling, or shared clonal evolution.
+
+⚠️ Important:
+The inferred directions represent statistical dependencies, not definitive mechanistic causality.
+
+🎯 Objectives
+
+Identify strong positive mutation co-occurrence relationships in AML
+
+Infer directional dependencies using logistic regression
+
+Enforce statistical rigor via Fisher’s exact test with Bonferroni correction
+
+Visualize results as a directed gene mutation network
+
+Generate biologically interpretable hypotheses for AML evolution
+
+
+Directional Dependency Modeling
+
+For every pair of genes (A, B):
+
+A logistic regression model is fitted:
+
+𝑃
+(
+𝐵
+=
+1
+∣
+𝐴
+)
+=
+𝜎
+(
+𝛽
+⋅
+𝐴
+)
+P(B=1∣A)=σ(β⋅A)
+
+The regression coefficient (β) measures how strongly mutation A increases the odds of mutation B
+
+Only relationships satisfying all criteria below are retained:
+
+
+
+
+Criterion	Threshold
+Minimum mutation count	≥ 20 samples
+Effect size	β > 0.6
+Statistical significance	Fisher’s Exact Test
+Multiple testing	Bonferroni correction
+
+Statistical Validation
+
+To ensure robustness:
+
+Each gene pair is tested using Fisher’s exact test
+
+P-values are corrected for multiple comparisons using Bonferroni adjustment
+
+Only positive and statistically significant relationships are reported
+
+
+Key Results
+Significant Directed Co-occurrence Relationships
+NPM1 → FLT3_ITD        (β=2.17, p=6.56e-126)
+NPM1 → DNMT3A         (β=2.19, p=7.05e-130)
+FLT3_ITD → DNMT3A     (β=2.08, p=1.60e-113)
+RUNX1 → ASXL1         (β=1.58, p=8.57e-64)
+RUNX1 → SRSF2         (β=2.20, p=6.74e-116)
+RUNX1 → U2AF1         (β=1.83, p=1.53e-78)
+ASXL1 → SRSF2         (β=1.84, p=3.35e-80)
+ASXL1 → U2AF1         (β=1.60, p=3.37e-58)
+SRSF2 → U2AF1         (β=2.17, p=6.35e-102)
+TP53 → Complex_Karyotype (β=2.35, p=1.55e-124)
+IDH2 → CEBPA_biallelic   (β=2.29, p=1.15e-132)
+
+
+
+🧬 Network Visualization
+
+Nodes represent genes or cytogenetic features
+
+Green arrows indicate strong, statistically significant positive dependencies
+
+Edge thickness corresponds to effect size
+
+Edge labels display regression strength and p-value
+
+Interpretation:
+
+Arrows indicate that mutation A increases the probability of mutation B
+
+Bidirectional patterns reflect co-selection or pathway coupling, not reciprocal causation
+
+🧠 Biological Interpretation
+
+This framework recapitulates known AML biology:
+
+NPM1 → FLT3_ITD
+Consistent with early founder mutations followed by proliferative signaling hits
+
+Spliceosome gene clustering (SRSF2, U2AF1, ASXL1)
+Reflects pathway-level selection and shared clonal evolution
+
+TP53 → Complex Karyotype
+Matches established associations between TP53 loss and genomic instability
+
+⚠️ Causal Disclaimer
+
+While arrows suggest mutation ordering, this model does not establish direct mechanistic causality. Observed dependencies may reflect shared clonal origin, functional pathway coupling, or selective pressure during leukemogenesis.
+
+This project is intended as a hypothesis-generating causal scaffold.
+
+
+# 🧬 AML-Genomic-Subtyping-with-Graphs-Causality
+
+**Graph-based discovery of AML genomic subtypes and mutation dependencies**
+
+---
+
+## 📖 Background & Motivation
+
+This project explores **Acute Myeloid Leukemia (AML)** genomic subtypes using a **graph-based machine learning and causal-inference–inspired approach**, inspired by the landmark paper:
+
+> **Machine learning integrates genomic signatures for subclassification beyond primary and secondary acute myeloid leukemia**  
+> *Blood* (2021)  
+> https://ashpublications.org/blood/article-abstract/138/19/1885/476049
+
+Rather than relying solely on supervised classifiers, this project adopts a **network-driven perspective**, allowing AML subtypes and mutation relationships to **emerge directly from the data**.
+
+> **Core premise:**  
+> AML is driven by **combinations of cooperating mutations**, not isolated genetic events.
+
+---
+
+## 💡 Core Questions
+
+1. Which mutations tend to co-occur in the same patients?
+2. Can mutation communities (AML subtypes) be discovered automatically?
+3. Which mutations show strong positive or exclusive (negative) relationships?
+
+---
+
+## 📊 Data
+
+**Source:** Simulated AML mutation matrix derived from **TCGA-LAML**  
+**Patients:** ~3000  
+
+**Genes analyzed (binary: mutated / not mutated):**
+
+- **Signaling / Epigenetic:**  
+  `NPM1`, `FLT3-ITD`, `DNMT3A`, `IDH1`, `IDH2`
+- **Transcription / Splicing:**  
+  `RUNX1`, `ASXL1`, `SRSF2`, `U2AF1`
+- **Chromosomal instability:**  
+  `TP53`, `Complex Karyotype`
+- **Favorable-risk AML:**  
+  `CEBPA (biallelic)`
+
+⚠️ Data are simulated for methodological demonstration only.
+
+---
+
+## 🔗 1. Mutation Co-occurrence Network
+
+### Graph Representation
+
+- **Nodes:** Gene mutations  
+- **Edges:** Frequent co-occurrence in patients  
+- **Edge thickness:** Number of shared patients  
+
+Co-occurrence matrix:
+
+```python
+co_occurrence = aml_df[GENES].T.dot(aml_df[GENES])
 
