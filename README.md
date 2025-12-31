@@ -7,11 +7,9 @@ Blood (2021) https://ashpublications.org/blood/article-abstract/138/19/1885/4760
 
 Instead of using traditional supervised classifiers alone, this project takes a network-driven perspective to understand how mutations co-occur, cluster, and define biological AML subtypes.
 
-Acute Myeloid Leukemia (AML) is driven by complex combinations of somatic gene mutations rather than isolated genetic events. 
-Understanding how mutations co-occur and organize into biological programs is essential for uncovering leukemogenic mechanisms and therapeutic vulnerabilities.
 
 
-💡 Core Idea
+ Core Idea
 
 AML is not driven by single mutations, but by combinations of cooperating mutations that define distinct disease entities.
 
@@ -24,7 +22,7 @@ Can we automatically identify mutation communities (subtypes)?
 Which mutations show strong positive or negative (exclusive) relationships?
 
 
-📊 Data
+ Data
 
 Source: Simulated AML mutation matrix derived from TCGA-LAML (Genomic Data Commons, NCI)
 
@@ -42,7 +40,8 @@ IDH1, IDH2
 
 CEBPA (biallelic)
 
-⚠️ Data are simulated for methodological demonstration, not direct clinical inference.
+
+Data are simulated for methodological demonstration, not direct clinical inference.
 
 
 🔗 1. Co-occurrence Network (Graph-Based View)
@@ -61,6 +60,8 @@ co_occurrence = aml_df[GENES].T.dot(aml_df[GENES])
 This matrix counts how many patients carry both mutation A and mutation B.
 
 
+
+
 Why use a threshold (e.g. >80 patients)?
 
 Small co-occurrence counts can occur by chance
@@ -72,7 +73,10 @@ Thresholding reduces noise and improves interpretability
 Trade-off: rare but real relationships may be missed — this is intentional to focus on dominant AML biology.
 
 
+
 2. Automatic Mutation Community Detection
+
+Which mutations tend to cluster together as a group across the entire dataset?
 
 To identify groups of mutations that tend to appear together, we applied modularity-based community detection:
 
@@ -95,7 +99,7 @@ Isolated metabolic subtype
 These communities emerge automatically, without predefined labels — showing that graph structure alone recovers known AML subtypes.
 
 
-🧠 3. Raw Co-occurrence Counts (Transparency)
+ 3. Raw Co-occurrence Counts (Transparency)
 
 To maintain interpretability, the project also prints:
 
@@ -114,28 +118,27 @@ RUNX1	SRSF2	385
 These numbers align strongly with established AML biology.
 
 
-🎨 Visualization (What You See in the Figure)
-Node Colors (Biological Meaning)
+### AML Mutation Co-occurrence Network
 
-🔵 Sky blue → NPM1 / FLT3-ITD / DNMT3A / IDH1/2
-(Signaling & epigenetic AML)
+This directed graph shows **strong and statistically significant positive co-occurrences** among recurrent mutations in Acute Myeloid Leukemia (AML), based on logistic regression and Fisher's exact test (Bonferroni-corrected).
 
-🟢 Light green → RUNX1 / SRSF2 / U2AF1 / ASXL1
-(Splicing / transcription – secondary AML)
+**Key findings** (only the strongest links are displayed):
 
-🔴 Salmon → TP53 / Complex Karyotype
-(Adverse-risk AML)
+- **NPM1-centered cluster** (classic normal-karyotype AML):  
+  NPM1 ↔ FLT3-ITD ↔ DNMT3A form a tightly cooperating trio (highest co-occurrence rates).
 
-🟣 Violet → CEBPA biallelic
-(Favorable-risk AML)
+- **Splicing factor / myeloid neoplasia cluster**:  
+  SRSF2 ↔ U2AF1 ↔ ASXL1 ↔ RUNX1 frequently co-occur, defining a distinct subgroup often with myelodysplastic features.
 
-Edge Interpretation
+- **Adverse-risk group**:  
+  TP53 ↔ Complex_Karyotype — almost inseparable, reflecting genomic catastrophe driven by loss of p53 function.
 
-Black edges → Strong co-occurrence
+- **CEBPA / IDH2**:  
+  Strong bidirectional link between biallelic CEBPA mutations and IDH2.
 
-Thicker edges → More patients share both mutations
+Green arrows indicate that the presence of one mutation significantly increases the likelihood of the other. Arrow thickness and edge labels reflect association strength (log-odds coefficient) and p-value.
 
-Dense clusters → Biological AML subtypes
+This network accurately recapitulates the major molecular subclasses of AML as defined in current clinical guidelines (ELN 2022, ICC).
 
 
 ⚠️ Limitations
